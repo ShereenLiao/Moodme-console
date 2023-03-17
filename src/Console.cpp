@@ -6,13 +6,11 @@
 #include "InvalidResponse.h"
 
 
-void Console::search(std::string criteria){
+void Console::search(std::string criteria, int offset){
     this->criteria = criteria;
-    this->offset = 0;
     std::string target = stickers_api + "?api_key=" + api_key + "&q=" + criteria+"&offset=" + std::to_string(offset);
     // The io_context is required for all I/O
     net::io_context ioc;
-
     // These objects perform our I/O
     tcp::resolver resolver(ioc);
     beast::tcp_stream stream(ioc);
@@ -57,6 +55,7 @@ void Console::search(std::string criteria){
 
 void Console::parse_body(http::response<http::dynamic_body> res){
     std::string body = beast::buffers_to_string(res.body().data());
+    std::vector<std::pair<std::string, std::string>> urls;
     auto json = json::parse(body);
     int count = 0;
     for(auto data : json["data"]){
@@ -67,9 +66,13 @@ void Console::parse_body(http::response<http::dynamic_body> res){
         std::cout<<url<<" "<<rating<<std::endl;
     }
     if(count == 0){
-        std::cout<<"No data"<<std::endl;
+        std::cout<<"No data. "<<std::endl;
+        std::cout<<"The console is in waiting mode."<<std::endl;
+        this->status = WAITING;
     }
-//    int count = json["pagination"]["count"];
+    else{
+        this->images.push_back(urls);
+    }
     offset += count;
 }
 
@@ -86,27 +89,31 @@ void Console::parse_header(http::response<http::dynamic_body> res){
 }
 
 void Console::next() {
-    this->search(criteria);
+    this->search(criteria, this->offset);
 }
 
 void Console::cancel(){
-
+    if(this->status == WAITING){
+        this->status = ACTIVE;
+        std::cout<<"The console is in active mode."<<std::endl;
+    }
+    else{
+        std::cout<<"There is not ongoing search."<<std::endl;
+    }
 }
 
 void Console::countByRating(std::string rating) {
     int count = 0;
-    for(auto p : urls){
-        if(p.second == rating){
-            count++;
+    for(auto vec : images){
+        for(auto p : vec){
+            if(p.second == rating){
+                count++;
+            }
         }
     }
     std::cout<<"The number of images of rating " + rating +" is " + std::to_string(count)<<std::endl;
 }
 
-
-
-void Console::connect_handler(const boost::system::error_code & ec) {
-}
 
 void Console::run() {
     std::string input;
@@ -115,17 +122,22 @@ void Console::run() {
         std::getline(std::cin, input);
         std::vector<std::string> commands = splitString(input, " ");
         std::string command = commands.front();
-        if(command.compare("search") == 0 && commands.size() == 2){
-            search(commands[1]);
+        if(this->status == WAITING){
+            if(command.compare("cancel") == 0 && commands.size() == 1){
+                cancel();
+            }
+            else{
+                std::cout<<"The console is in waiting mode"<<std::endl;
+            }
+        }
+        else if(command.compare("search")== 0 && commands.size() == 2){
+            search(commands[1], 0);
         }
         else if(command.compare("rank") == 0 && commands.size() == 2){
             countByRating(commands[1]);
         }
-        else if(command.compare("next") == 0){
+        else if(command.compare("next") == 0 && commands.size() == 1){
             next();
-        }
-        else if(command.compare("cancel") == 0){
-            cancel();
         }
         else{
             std::cout<<"Invalid input.\n"
@@ -140,12 +152,12 @@ void Console::run() {
 }
 
 
-
-std::vector<std::string> Console::splitString(std::string str, std::string delimiter) {
+std::vector<std::string> Console::splitString(const std::string & str, std::string delimiter) {
     int start = 0;
     int end = str.find(delimiter);
     std::vector<std::string> parsed_command ;
     while (end != -1) {
+        std::string token = make_lowercase(str.substr(start, end - start));
         parsed_command.push_back(str.substr(start, end - start));
         start = end + delimiter.size();
         end = str.find(delimiter, start);
@@ -154,5 +166,12 @@ std::vector<std::string> Console::splitString(std::string str, std::string delim
     return parsed_command;
 }
 
+std::string Console::make_lowercase(const std::string& in)
+{
+    std::string out;
+
+    std::transform( in.begin(), in.end(), std::back_inserter( out ), ::tolower );
+    return out;
+}
 
 
