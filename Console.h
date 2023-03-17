@@ -31,15 +31,22 @@ private:
     const std::string port = "80";
     const std::string stickers_api = "/v1/stickers/search";
     const std::string api_key = "aSw3Zz2JXx9oKftl4wPGqBwt6jaj1j21";
+    std::string criteria;
     const int version = 11;
     int offset = 0;
-    std::vector<std::string> urls;
+    std::vector<std::pair<std::string, std::string>> urls;
 
     void parse_body(http::response<http::dynamic_body> res);
     void parse_header(http::response<http::dynamic_body> res);
 
 public:
     void search(std::string criteria);
+    void next();
+    void cancel();
+    void countByRating(std::string rating);
+    void connect_handler(const boost::system::error_code & ec);
+    void run();
+    std::vector<std::string>  splitString(std::string str, std::string delimiter = " ");
 };
 
 

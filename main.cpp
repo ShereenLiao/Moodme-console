@@ -3,7 +3,11 @@
 
 int main() {
     Console * console = new Console();
-    console->test();
+    console->run();
+//    console->search("dog");
+//    std::cout<<"====="<<std::endl;
+//    console->next();
+//    console->countByRating("g");
     return 0;
 }
 
