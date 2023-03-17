@@ -1,14 +1,13 @@
-cmake_minimum_required(VERSION 3.23)
-project(console)
+cmake_minimum_required(VERSION 3.13)
+project(moodMeConsole)
 
 set(CMAKE_CXX_STANDARD 14)
+set(JSON_Install OFF CACHE INTERNAL "")
 
-add_executable(console src/main.cpp src/Console.cpp src/Console.h)
-
-FIND_PACKAGE(nlohmann_json 3.11.2 REQUIRED)
-FIND_PACKAGE(Boost 1.81 COMPONENTS program_options REQUIRED )
+find_package(nlohmann_json CONFIG  REQUIRED)
+FIND_PACKAGE(Boost CONFIG COMPONENTS program_options REQUIRED )
 INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIR} )
 
-add_executable(Console src/main.cpp src/Console.cpp src/Console.h src/InvalidResponse.h)
-TARGET_LINK_LIBRARIES(Console LINK_PUBLIC ${Boost_LIBRARIES} )
-target_link_libraries(Console PRIVATE nlohmann_json::nlohmann_json)
+add_executable(moodMeConsole src/main.cpp src/invalidResponse.cpp src/client.cpp include/client.h)
+TARGET_LINK_LIBRARIES(moodMeConsole LINK_PUBLIC ${Boost_LIBRARIES} )
+target_link_libraries(moodMeConsole PRIVATE nlohmann_json::nlohmann_json)
