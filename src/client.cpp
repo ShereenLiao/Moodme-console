@@ -160,7 +160,7 @@ void client::parse_body(http::response<http::dynamic_body> res){
         std::string rating = data["rating"];
         urls.emplace_back(url, rating);
         count += 1;
-        std::cout<<url<<" "<<rating<<std::endl;
+        std::cout<<url<<std::endl;
     }
     if(count == 0){
         std::cout<<"No data. "<<std::endl;
