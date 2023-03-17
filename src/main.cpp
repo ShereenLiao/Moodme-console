@@ -1,10 +1,14 @@
 #include <iostream>
-#include "Console.h"
+#include "../include/client.h"
 
 int main() {
-    Console * console = new Console();
-    console->run();
-    return 0;
+    try{
+        boost::asio::io_service io_service;
+        client * app = new client(io_service);
+        app->run();
+    }
+    catch (std::exception& e)
+    {
+        std::cout << "Exception: " << e.what() << "\n";
+    }
 }
-
-
