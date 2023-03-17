@@ -10,23 +10,25 @@ brew install build-essential
 brew install nlohmann-json-dev 
 brew install boost
 ```
-### Linux
+### Ubuntu
 ```shell
-apt-get install build-essential;
-apt-get install libboost-all-dev;
-apt-get install -y nlohmann-json-dev;
+sudo yum -y install git
+sudo yum -y install cmake
+sudo yum groupinstall 'Development Tools'
+sudo yum install boost-devel
+sudo apt-get install nlohmann-json3-dev
 ```
 ## Compile
 ```shell
 cmake .
-make install
+make
 ```
 
 ## Run
 ```shell
-./console
+./moodeMeConsole
 ```
-Valid Usages:
+## Valid Usages:
 * search \<criteria>
 * next
 * rank \<rating>
